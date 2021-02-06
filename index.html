@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Miller IDE: Advanced G-Code Editor</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <!-- External links -->
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap'>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script>if (window.module) module = window.module;</script>
+</head>
+<body>
+    <!-- Navigation menu -->
+    <div id='nav-bar'>
+        <div id='logo'>
+            <img src='images/logo-padded.png'>
+        </div>
+        <div class='menu'>
+            File
+            <div class='drop-down'>
+                <div class='menu-button' onclick='openFile()'>Open...</div>
+                <div class='menu-button' onclick='getCode()'>Generate Code</div>
+                <hr>
+                <div class='menu-button' onclick='windowClose()'>Exit</div>
+            </div>
+        </div>
+        <div class='menu'>
+            Edit
+            <div class='drop-down'>
+                <div class='menu-button'>Undo</div>
+                <div class='menu-button'>Redo</div>
+                <hr>
+                <div class='menu-button' onclick='cut()'>Cut</div>
+                <div class='menu-button' onclick='copy()'>Copy</div>
+                <div class='menu-button' onclick='paste()'>Paste</div>
+                <div class='menu-button' onclick='deleteCanvas()'>Delete</div>
+                <hr>
+                <div class='menu-button' onclick='selectFirst()'>Select First</div>
+                <div class='menu-button' onclick='selectLast()'>Select Last</div>
+            </div>
+        </div>
+        <div class='menu'>
+            View
+            <div class='drop-down'>
+                <div class='menu-button' onclick='zoomIn()'>Zoom In</div>
+                <div class='menu-button' onclick='zoomOut()'>Zoom Out</div>
+            </div>
+        </div>
+        <div class='menu'>
+            Help
+            <div class='drop-down'>
+                <div class='menu-button' onclick='viewHelp()'>View Help</div>
+                <div class='menu-button' onclick='loadExample()'>Load Example</div>
+                <hr>
+                <div class='menu-button' onclick='sendFeedback()'>Send Feedback</div>
+            </div>
+        </div>
+        <div id='window-icons'>
+            <div class='menu' onclick='windowMinimize()'><i class='fa fa-window-minimize'></i></div>
+            <div class='menu' id='window-maximizer' onclick='windowMaximize()'><i class='fa fa-window-maximize'></i></div>
+            <div class='menu' onclick='windowClose()'><i class='fa fa-close'></i></div>
+        </div>
+    </div>
+    <!-- Left panel -->
+    <div id='left-panel'>
+        <!-- Open program -->
+        <div id='open-dialog' onclick='openFile()'>Open a Program</div>
+        <!-- Tool bar -->
+        <div id='tool-bar'>
+            <div class='tool-button' style='border-left: 1px solid #e1e4e4; margin: 0 0 0 60px;' onclick='copy()' title='Copy'><i class='fa fa-copy'></i></div>
+            <div class='tool-button' onclick='cut()' title='Cut'><i class='fa fa-cut'></i></div>
+            <div class='tool-button' onclick='paste()' title='Paste'><i class='fa fa-paste'></i></div>
+            <div class='tool-button' onclick='rotateCW()' title='Rotate Counter-Clockwise'><i class='fa fa-undo'></i></div>
+            <div class='tool-button' onclick='rotateCCW()' title='Rotate Clockwise'><i class='fa fa-repeat'></i></div>
+        </div>
+        <!-- Simulation buttons -->
+        <!--
+        <div id='simulation-buttons'>
+            <i class='fa fa-fast-backward'></i>
+            <i class='fa fa-step-backward'></i>
+            <i class='fa fa-stop'></i>
+            <i class='fa fa-step-forward'></i>
+            <i class='fa fa-fast-forward'></i>
+        </div>
+        -->
+        <!-- Workspace -->
+        <div id='workspace'>
+            <div id='workspaceContainer' style='position: absolute; height: 100%; width: 100%;'>
+                <div class='canvas-row'>
+                    <div class='canvas-container'>
+                        <canvas id='first-canvas' class='canvas none'></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Right panel -->
+    <div id='right-panel'>
+        <!-- Program menus -->
+        <div class='program-menu'>
+            <div class='category-container'>
+                <div class='category'>
+                    Positioning
+                    <i class='fa fa-chevron-down'></i>
+                </div>
+                <div class='setting'>
+                    Work Offset
+                    <input id='work-offset' class='setting-input' placeholder='G54'>
+                </div>
+            </div>
+            <div class='category-container'>
+                <div class='category'>
+                    Transform
+                    <i class='fa fa-chevron-down'></i>
+                </div>
+                <div class='setting'>
+                    Rotation
+                    <input id='rotation' class='setting-input' placeholder='0°' readonly>
+                </div>
+                <div class='setting'>
+                    Translate along X
+                    <input id='transform-x' class='setting-input' placeholder='0'>
+                </div>
+                <div class='setting'>
+                    Translate along Y
+                    <input id='transform-y' class='setting-input' placeholder='0'>
+                </div>
+                <div class='setting'>
+                    Translate along Z
+                    <input id='transform-z' class='setting-input' placeholder='0'>
+                </div>
+            </div>
+            <div class='category-container'>
+                <div class='category'>
+                    Advanced Settings
+                    <i class='fa fa-chevron-down'></i>
+                </div>
+                <div class='setting'>
+                    Experimental Feature
+                </div>
+            </div>
+        </div>
+        <div class='program-menu'>
+            <div class='category-container'>
+                <div class='category'>
+                    Instructions
+                    <i class='fa fa-chevron-down'></i>
+                </div>
+                <div class='setting'>
+                    Note to Operator
+                    <input id='note' class='setting-input' placeholder='Made with Miller IDE – Get the Most Out of G-Code'>
+                </div>
+            </div>
+            <div class='category-container'>
+                <div class='category'>
+                    Export Options
+                    <i class='fa fa-chevron-down'></i>
+                </div>
+                <div class='setting'>Experimental Feature</div>
+            </div>
+            <div class='category-container'>
+                <div class='category'>
+                    Auto-Commenting
+                    <i class='fa fa-chevron-down'></i>
+                </div>
+                <div class='setting'>Experimental Feature</div>
+            </div>
+        </div>
+        <!-- "Export G-Code" button -->
+        <div id='export-button' onclick='getCode()'>
+            Export G-Code
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src='renderer.js'></script>
+</body>
+</html>

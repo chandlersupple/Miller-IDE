@@ -1,0 +1,14 @@
+{
+  "name": "miller-ide",
+  "version": "4.0.0",
+  "description": "Get the most out of G-code; Edit programs on the assembly floor and save on labor costs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Chandler Supple",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^10.1.3"
+  }
+}
